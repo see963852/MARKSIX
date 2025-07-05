@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>香港六合彩統計分析系統</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .ball {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+        .special-ball {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            box-shadow: 0 4px 15px rgba(245, 87, 108, 0.3);
+        }
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .card-hover {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+        .tab-content {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .loading {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        #minimax-floating-ball {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 10px 12px;
+            background: #222222;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            color: #F8F8F8;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            z-index: 9999;
+            transition: all 0.3s ease;
+            overflow: hidden;
+            cursor: pointer;
+        }
+        #minimax-floating-ball:hover {
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="bg-white shadow-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex">
+                    <button class="tab-btn py-4 px-6 text-gray-500 hover:text-gray-700 font-medium" data-tab="dashboard">
+                        <i class="fas fa-tachometer-alt mr-2"></i>儀表盤
+                    </button>
+                    <button class="tab-btn py-4 px-6 text-gray-500 hover:text-gray-700 font-medium" data-tab="statistics">
+                        <i class="fas fa-chart-bar mr-2"></i>統計分析
+                    </button>
+                    <button class="tab-btn py-4 px-6 text-gray-500 hover:text-gray-700 font-medium" data-tab="generator">
+                        <i class="fas fa-magic mr-2"></i>組合生成器
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Dashboard Tab -->
+        <div id="dashboard-content" class="tab-content">
+            <!-- Stats Overview -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div class="bg-white rounded-lg shadow-md p-6 card-hover">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-600">總開獎期數</p>
+                            <p class="text-2xl font-bold text-gray-900" id="total-draws">0</p>
+                        </div>
+                        <div class="bg-blue-100 p-3 rounded-full">
+                            <i class="fas fa-hashtag text-blue-600"></i>
+                        </div>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-2">數據範圍：2020-2025年</p>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-md p-6 card-hover">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-600">最熱門號碼</p>
+                            <p class="text-2xl font-bold text-red-600" id="hot-number" style="max-width: 100px; word-wrap: break-word;">--</p>
+                        </div>
+                        <div class="bg-red-100 p-3 rounded-full">
+                            <i class="fas fa-fire text-red-600"></i>
+                        </div>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-2">出現 <span id="hot-frequency">0</span> 次</p>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-md p-6 card-hover">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-600">最冷門號碼</p>
+                            <p class="text-2xl font-bold text-blue-600" id="cold-number" style="max-width: 100px; word-wrap: break-word;">--</p>
+                        </div>
+                        <div class="bg-blue-100 p-3 rounded-full">
+                            <i class="fas fa-snowflake text-blue-600"></i>
+                        </div>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-2">出現 <span id="cold-frequency">0</span> 次</p>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-md p-6 card-hover">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-600">最新期數</p>
+                            <p class="text-2xl font-bold text-purple-600" id="latest-period">--</p>
+                        </div>
+                        <div class="bg-purple-100 p-3 rounded-full">
+                            <i class="fas fa-calendar text-purple-600"></i>
+                        </div>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-2" id="latest-date">--</p>
+                </div>
+            </div>
+
+            <!-- Recent Results -->
+            <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+                <h2 class="text-xl font-bold text-gray-900 mb-6 flex items-center">
+                    <i class="fas fa-history mr-2 text-blue-600"></i>
+                    最近開獎結果
+                </h2>
+                <div id="recent-results" class="space-y-4">
+                    <!-- Recent results will be populated here -->
+                </div>
+            </div>
+
+            <!-- Quick Stats -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">號碼頻率 TOP 10</h3>
+                    <div id="frequency-chart-container">
+                        <canvas id="frequency-chart" width="400" height="200"></canvas>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">奇偶分佈</h3>
+                    <div id="odd-even-chart-container">
+                        <canvas id="odd-even-chart" width="400" height="200"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics Tab -->
+        <div id="statistics-content" class="tab-content hidden">
+            <!-- Year Range Selector -->
+            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                    <i class="fas fa-filter mr-2 text-blue-600"></i>
+                    年份範圍選擇
+                </h2>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">開始年份</label>
+                        <select id="start-year" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="all">全部數據</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">結束年份</label>
+                        <select id="end-year" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="all">全部數據</option>
+                        </select>
+                    </div>
+                    <div class="flex items-end">
+                        <button id="apply-filter" class="gradient-bg text-white px-6 py-2 rounded-md hover:opacity-90 transition-opacity font-medium">
+                            <i class="fas fa-check mr-2"></i>應用過濾器
+                        </button>
+                    </div>
+                </div>
+
+                <p class="text-sm text-gray-600">
+                    分析範圍：<span id="analysis-range">2025年</span> |
+                    記錄總數：<span id="analysis-total" class="font-semibold text-blue-600">0</span> 期
+                </p>
+            </div>
+
+            <!-- Detailed Statistics Tables -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">詳細統計表</h3>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">號碼</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">出現次數</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">頻率 (%)</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">分類</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">最後出現</th>
+                            </tr>
+                        </thead>
+                        <tbody id="stats-table" class="bg-white divide-y divide-gray-200">
+                            <!-- Table content will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Generator Tab -->
+        <div id="generator-content" class="tab-content hidden">
+            <!-- Configuration Panel -->
+            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                    <i class="fas fa-cogs mr-2 text-blue-600"></i>
+                    組合生成配置
+                </h2>
+
+                <!-- Year Selection for Generator -->
+                <div class="mb-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-3">歷史數據年份選擇</h3>
+                    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mb-4" id="generator-year-container">
+                        <!-- Year checkboxes will be populated here -->
+                    </div>
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <p class="text-sm text-gray-600">
+                            基於 <span id="generator-total" class="font-semibold text-blue-600">0</span> 期開獎記錄生成組合
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Strategy Selection -->
+                <div class="mb-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-3">生成策略選擇</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <label class="flex items-start p-4 border rounded-lg hover:bg-gray-50 cursor-pointer">
+                            <input type="checkbox" class="strategy-checkbox mr-3 mt-1" value="hot_numbers" checked>
+                            <div>
+                                <div class="font-medium text-gray-900">熱門號碼策略</div>
+                                <div class="text-sm text-gray-600">基於出現頻率最高的號碼</div>
+                            </div>
+                        </label>
+
+                        <label class="flex items-start p-4 border rounded-lg hover:bg-gray-50 cursor-pointer">
+                            <input type="checkbox" class="strategy-checkbox mr-3 mt-1" value="cold_numbers">
+                            <div>
+                                <div class="font-medium text-gray-900">冷門號碼策略</div>
+                                <div class="text-sm text-gray-600">基於出現頻率最低的號碼</div>
+                            </div>
+                        </label>
+
+                        <label class="flex items-start p-4 border rounded-lg hover:bg-gray-50 cursor-pointer">
+                            <input type="checkbox" class="strategy-checkbox mr-3 mt-1" value="balanced">
+                            <div>
+                                <div class="font-medium text-gray-900">平衡策略</div>
+                                <div class="text-sm text-gray-600">結合熱門、中溫和冷門號碼</div>
+                            </div>
+                        </label>
+
+                        <label class="flex items-start p-4 border rounded-lg hover:bg-gray-50 cursor-pointer">
+                            <input type="checkbox" class="strategy-checkbox mr-3 mt-1" value="random">
+                            <div>
+                                <div class="font-medium text-gray-900">隨機策略</div>
+                                <div class="text-sm text-gray-600">完全隨機生成號碼組合</div>
+                            </div>
+                        </label>
+
+                        <label class="flex items-start p-4 border rounded-lg hover:bg-gray-50 cursor-pointer">
+                            <input type="checkbox" class="strategy-checkbox mr-3 mt-1" value="odd_even_balanced">
+                            <div>
+                                <div class="font-medium text-gray-900">奇偶平衡策略</div>
+                                <div class="text-sm text-gray-600">確保奇偶數的合理分佈</div>
+                            </div>
+                        </label>
+
+                        <label class="flex items-start p-4 border rounded-lg hover:bg-gray-50 cursor-pointer">
+                            <input type="checkbox" class="strategy-checkbox mr-3 mt-1" value="size_balanced">
+                            <div>
+                                <div class="font-medium text-gray-900">大小平衡策略</div>
+                                <div class="text-sm text-gray-600">確保大小號的合理分佈</div>
+                            </div>
+                        </label>
+
+                        <label class="flex items-start p-4 border rounded-lg hover:bg-gray-50 cursor-pointer">
+                            <input type="checkbox" class="strategy-checkbox mr-3 mt-1" value="consecutive">
+                            <div>
+                                <div class="font-medium text-gray-900">連號策略</div>
+                                <div class="text-sm text-gray-600">基於連續號碼出現規律</div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Generation Settings -->
+                <div class="mb-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-3">生成設定</h3>
+                    <div class="flex items-center space-x-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">組合數量</label>
+                            <input type="number" id="combination-count" min="1" max="1000" value="10"
+                                   class="w-24 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div class="flex items-end">
+                            <button id="generate-combinations" class="gradient-bg text-white px-6 py-2 rounded-md hover:opacity-90 transition-opacity font-medium">
+                                <i class="fas fa-magic mr-2"></i>生成組合
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Generated Combinations -->
+            <div id="combinations-result" class="bg-white rounded-lg shadow-md p-6 hidden">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-semibold text-gray-900">生成的組合</h3>
+                    <div class="space-x-2">
+                        <button id="export-csv" class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition-colors">
+                            <i class="fas fa-file-csv mr-2"></i>導出 CSV
+                        </button>
+                        <button id="export-json" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors">
+                            <i class="fas fa-file-code mr-2"></i>導出 JSON
+                        </button>
+                        <button id="export-txt" class="bg-purple-600 text-white px-4 py-2 rounded-md hover:bg-purple-700 transition-colors">
+                            <i class="fas fa-file-alt mr-2"></i>導出 TXT
+                        </button>
+                    </div>
+                </div>
+                <div id="combinations-list" class="space-y-3">
+                    <!-- Generated combinations will be displayed here -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-8 mt-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">系統資訊</h3>
+                    <ul class="space-y-2 text-sm text-gray-300">
+                        <li>版本：純前端 v1.0</li>
+                        <li>更新日期：2025年7月5日</li>
+                        <li>數據範圍：2020-2025年</li>
+                        <li>記錄總數：<span id="footer-total">622</span> 期</li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">功能特色</h3>
+                    <ul class="space-y-2 text-sm text-gray-300">
+                        <li>• 即時統計分析</li>
+                        <li>• 多策略組合生成</li>
+                        <li>• 年份範圍篩選</li>
+                        <li>• 響應式設計</li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">數據來源</h3>
+                    <ul class="space-y-2 text-sm text-gray-300">
+                        <li>• 香港賽馬會官方數據</li>
+                        <li>• 每週二、四、六開獎</li>
+                        <li>• 數據更新至2025年7月5日</li>
+                        <li>• 僅供研究參考用途</li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">免責聲明</h3>
+                    <p class="text-sm text-gray-400">
+                        本系統提供的所有數據和分析僅供研究和參考用途。
+                        任何基於本系統進行的投注決策，風險自負。
+                        請理性投注，切勿沉迷。
+                    </p>
+                </div>
+            </div>
+
+            <div class="border-t border-gray-700 mt-8 pt-8 text-center">
+                <p class="text-sm text-gray-400">
+                    © 2025 香港六合彩統計分析系統. 純前端版本，不依賴任何後端服務。
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Include the data file -->
+    <script src="data.js"></script>
+
+    <!-- Main JavaScript -->
+    <script>
+        // Global variables
+        let currentData = [];
+        let filteredData = [];
+        let generatedCombinations = [];
+        let chartInstances = {};
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeApp();
+        });
+
+        function initializeApp() {
+            currentData = window.LOTTERY_DATA || [];
+            // Ensure data is sorted in descending order by time (newest first)
+            currentData.sort((a, b) => {
+                if (a.year !== b.year) return b.year - a.year;
+                return b.period - a.period;
+            });
+
+            filteredData = [...currentData];
+
+            setupEventListeners();
+            updateDashboard();
+            updateGeneratorTotal();
+            populateYearSelectors();
+
+            // Initialize charts with delay to ensure DOM is ready
+            setTimeout(() => {
+                updateFrequencyChart();
+                updateOddEvenChart();
+            }, 300);
+        }
+
+        function setupEventListeners() {
+            // Tab navigation
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+            });
+
+            // Statistics filters
+            document.getElementById('apply-filter').addEventListener('click', applyStatisticsFilter);
+
+            // Generator events - Add event listener for year checkboxes
+            document.getElementById('generator-year-container').addEventListener('change', function(e) {
+                if (e.target.classList.contains('generator-year-checkbox')) {
+                    updateGeneratorTotal();
+                }
+            });
+
+            document.getElementById('generate-combinations').addEventListener('click', generateCombinations);
+            document.getElementById('export-csv').addEventListener('click', () => exportCombinations('csv'));
+            document.getElementById('export-json').addEventListener('click', () => exportCombinations('json'));
+            document.getElementById('export-txt').addEventListener('click', () => exportCombinations('txt'));
+        }
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.add('hidden');
+            });
+            document.getElementById(`${tab}-content`).classList.remove('hidden');
+        }
+
+        function applyStatisticsFilter() {
+            const startYear = document.getElementById('start-year').value;
+            const endYear = document.getElementById('end-year').value;
+
+            if (startYear === 'all' && endYear === 'all') {
+                filteredData = [...currentData];
+            } else if (startYear === 'all') {
+                filteredData = currentData.filter(draw => draw.year <= parseInt(endYear));
+            } else if (endYear === 'all') {
+                filteredData = currentData.filter(draw => draw.year >= parseInt(startYear));
+            } else {
+                const start = parseInt(startYear);
+                const end = parseInt(endYear);
+                if (start > end) {
+                    alert('開始年份不能大於結束年份');
+                    return;
+                }
+                filteredData = currentData.filter(draw => draw.year >= start && draw.year <= end);
+            }
+
+            // Update analysis info
+            const rangeText = startYear === endYear ? `${startYear}年` : `${startYear}-${endYear}年`;
+            document.getElementById('analysis-range').textContent = rangeText;
+            document.getElementById('analysis-total').textContent = filteredData.length.toLocaleString();
+
+            // Update statistics table
+            updateStatisticsTable();
+        }
+
+        function updateDashboard() {
+            const totalDraws = currentData.length;
+            const frequencyMap = calculateFrequency(currentData);
+            const sortedFreq = Object.entries(frequencyMap)
+               .sort((a, b) => b[1] - a[1]);
+
+            // Update overview stats
+            document.getElementById('total-draws').textContent = totalDraws.toLocaleString();
+            document.getElementById('footer-total').textContent = totalDraws.toLocaleString();
+
+            if (sortedFreq.length > 0) {
+                document.getElementById('hot-number').textContent = sortedFreq[0][0];
+                document.getElementById('hot-frequency').textContent = sortedFreq[0][1];
+                document.getElementById('cold-number').textContent = sortedFreq[sortedFreq.length - 1][0];
+                document.getElementById('cold-frequency').textContent = sortedFreq[sortedFreq.length - 1][1];
+            }
+
+            if (currentData.length > 0) {
+                // Take the first record (already sorted newest first)
+                const latest = currentData[0];
+                document.getElementById('latest-period').textContent = `${latest.year}/${latest.period}`;
+                document.getElementById('latest-date').textContent = latest.date;
+            }
+
+            // Update recent results
+            updateRecentResults();
+        }
+
+        function updateRecentResults() {
+            // Take the latest 5 records (already sorted by time descending)
+            const recentData = currentData.slice(0, 5);
+            const container = document.getElementById('recent-results');
+
+            container.innerHTML = recentData.map(draw => `
+                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                    <div class="flex items-center space-x-4">
+                        <div class="text-sm font-medium text-gray-900">
+                            ${draw.year}年第${draw.period}期
+                        </div>
+                        <div class="text-sm text-gray-600">${draw.date}</div>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        ${draw.numbers.map(num => `
+                            <div class="ball w-8 h-8 rounded-full text-white text-sm font-bold flex items-center justify-center">
+                                ${num}
+                            </div>
+                        `).join('')}
+                        <div class="special-ball w-8 h-8 rounded-full text-white text-sm font-bold flex items-center justify-center border-2 border-yellow-400">
+                            ${draw.special}
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function updateFrequencyChart() {
+            try {
+                const canvas = document.getElementById('frequency-chart');
+                if (!canvas) {
+                    console.error('Canvas element frequency-chart not found');
+                    return;
+                }
+
+                const ctx = canvas.getContext('2d');
+
+                // Destroy existing chart if it exists
+                if (chartInstances['frequency-chart']) {
+                    chartInstances['frequency-chart'].destroy();
+                    delete chartInstances['frequency-chart'];
+                }
+
+                const frequencyMap = calculateFrequency(currentData);
+                const sortedFreq = Object.entries(frequencyMap)
+                   .sort((a, b) => b[1] - a[1])
+                   .slice(0, 10);
+
+                if (sortedFreq.length === 0) {
+                    console.error('No frequency data available');
+                    return;
+                }
+
+                chartInstances['frequency-chart'] = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: sortedFreq.map(item => `號碼 ${item[0]}`),
+                        datasets: [{
+                            label: '出現次數',
+                            data: sortedFreq.map(item => item[1]),
+                            backgroundColor: 'rgba(99, 102, 241, 0.6)',
+                            borderColor: 'rgba(99, 102, 241, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error('Error updating frequency chart:', error);
+            }
+        }
+
+        function updateOddEvenChart() {
+            try {
+                const canvas = document.getElementById('odd-even-chart');
+                if (!canvas) {
+                    console.error('Canvas element odd-even-chart not found');
+                    return;
+                }
+
+                const ctx = canvas.getContext('2d');
+
+                // Destroy existing chart if it exists
+                if (chartInstances['odd-even-chart']) {
+                    chartInstances['odd-even-chart'].destroy();
+                    delete chartInstances['odd-even-chart'];
+                }
+
+                const oddEvenStats = calculateOddEvenStats(currentData);
+
+                chartInstances['odd-even-chart'] = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['奇數', '偶數'],
+                        datasets: [{
+                            data: [oddEvenStats.odd, oddEvenStats.even],
+                            backgroundColor: [
+                                'rgba(239, 68, 68, 0.6)',
+                                'rgba(59, 130, 246, 0.6)'
+                            ],
+                            borderColor: [
+                                'rgba(239, 68, 68, 1)',
+                                'rgba(59, 130, 246, 1)'
+                            ],
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: '奇偶數分佈'
+                            },
+                            legend: {
+                                position: 'bottom'
+                            }
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error('Error updating odd-even chart:', error);
+            }
+        }
+
+        function calculateFrequency(data) {
+            const frequency = {};
+
+            data.forEach(draw => {
+                // Count main numbers
+                draw.numbers.forEach(num => {
+                    frequency[num] = (frequency[num] || 0) + 1;
+                });
+                // Count special number
+                frequency[draw.special] = (frequency[draw.special] || 0) + 1;
+            });
+
+            return frequency;
+        }
+
+        function calculateOddEvenStats(data) {
+            let odd = 0, even = 0;
+
+            data.forEach(draw => {
+                draw.numbers.forEach(num => {
+                    if (num % 2 === 0) even++;
+                    else odd++;
+                });
+                if (draw.special % 2 === 0) even++;
+                else odd++;
+            });
+
+            return { odd, even };
+        }
+
+        function updateStatisticsTable() {
+            const frequencyMap = calculateFrequency(filteredData);
+            const sortedFreq = Object.entries(frequencyMap).sort((a, b) => b[1] - a[1]);
+            const totalDraws = filteredData.length;
+            const totalNumbers = totalDraws * 7; // 6 main + 1 special per draw
+
+            const tbody = document.getElementById('stats-table');
+            tbody.innerHTML = sortedFreq.map((item, index) => {
+                const number = parseInt(item[0]);
+                const frequency = item[1];
+                const percentage = ((frequency / totalNumbers) * 100).toFixed(2);
+
+                let category = '中溫';
+                if (index < Math.floor(sortedFreq.length * 0.2)) category = '熱門';
+                else if (index > Math.floor(sortedFreq.length * 0.8)) category = '冷門';
+
+                // Find last occurrence (filteredData is already sorted newest first)
+                let lastOccurrence = '未出現';
+                for (let i = 0; i < filteredData.length; i++) {
+                    const draw = filteredData[i];
+                    if (draw.numbers.includes(number) || draw.special === number) {
+                        lastOccurrence = draw.date;
+                        break;
+                    }
+                }
+
+                return `
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${number}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${frequency}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${percentage}%</td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                                category === '熱門' ? 'bg-red-100 text-red-800' :
+                                category === '冷門' ? 'bg-blue-100 text-blue-800' :
+                                'bg-gray-100 text-gray-800'
+                            }">
+                                ${category}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${lastOccurrence}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function updateGeneratorTotal() {
+            const selectedYears = Array.from(document.querySelectorAll('.generator-year-checkbox:checked'))
+               .map(cb => parseInt(cb.value));
+
+            const selectedData = currentData.filter(draw => selectedYears.includes(draw.year));
+            document.getElementById('generator-total').textContent = selectedData.length.toLocaleString();
+        }
+
+        function generateCombinations() {
+            const selectedYears = Array.from(document.querySelectorAll('.generator-year-checkbox:checked'))
+               .map(cb => parseInt(cb.value));
+
+            const selectedStrategies = Array.from(document.querySelectorAll('.strategy-checkbox:checked'))
+               .map(cb => cb.value);
+
+            const count = parseInt(document.getElementById('combination-count').value);
+
+            if (selectedYears.length === 0) {
+                alert('請至少選擇一個年份');
+                return;
+            }
+
+            if (selectedStrategies.length === 0) {
+                alert('請至少選擇一種生成策略');
+                return;
+            }
+
+            if (count < 1 || count > 1000) {
+                alert('組合數量必須在 1-1000 之間');
+                return;
+            }
+
+            const dataForGeneration = currentData.filter(draw => selectedYears.includes(draw.year));
+            generatedCombinations = [];
+
+            // Generate combinations using selected strategies
+            const combinationsPerStrategy = Math.ceil(count / selectedStrategies.length);
+
+            selectedStrategies.forEach(strategy => {
+                const strategyCombinations = generateByStrategy(strategy, combinationsPerStrategy, dataForGeneration);
+                generatedCombinations.push(...strategyCombinations);
+            });
+
+            // Remove duplicates and limit to requested count
+            generatedCombinations = removeDuplicateCombinations(generatedCombinations).slice(0, count);
+
+            displayCombinations();
+        }
+
+        function generateByStrategy(strategy, count, data) {
+            const combinations = [];
+            const frequencyMap = calculateFrequency(data);
+
+            for (let i = 0; i < count; i++) {
+                let numbers = [];
+
+                switch (strategy) {
+                    case 'hot_numbers':
+                        numbers = generateHotNumbers(frequencyMap).slice(0, 6);
+                        break;
+                    case 'cold_numbers':
+                        numbers = generateColdNumbers(frequencyMap).slice(0, 6);
+                        break;
+                    case 'balanced':
+                        numbers = generateBalancedNumbers(frequencyMap).slice(0, 6);
+                        break;
+                    case 'random':
+                        numbers = generateRandomNumbers().slice(0, 6);
+                        break;
+                    case 'odd_even_balanced':
+                        numbers = generateOddEvenBalanced().slice(0, 6);
+                        break;
+                    case 'size_balanced':
+                        numbers = generateSizeBalanced().slice(0, 6);
+                        break;
+                    case 'consecutive':
+                        numbers = generateConsecutiveNumbers().slice(0, 6);
+                        break;
+                    default:
+                        numbers = generateRandomNumbers().slice(0, 6);
+                }
+
+                combinations.push({
+                    numbers: numbers.sort((a, b) => a - b),
+                    strategy: strategy,
+                    timestamp: new Date().toISOString()
+                });
+            }
+
+            return combinations;
+        }
+
+        function generateHotNumbers(frequencyMap) {
+            const sortedNumbers = Object.entries(frequencyMap)
+               .sort((a, b) => b[1] - a[1])
+               .slice(0, 20)
+               .map(item => parseInt(item[0]));
+
+            return getRandomSelection(sortedNumbers, 6);
+        }
+
+        function generateColdNumbers(frequencyMap) {
+            const sortedNumbers = Object.entries(frequencyMap)
+               .sort((a, b) => a[1] - b[1])
+               .slice(0, 20)
+               .map(item => parseInt(item[0]));
+
+            return getRandomSelection(sortedNumbers, 6);
+        }
+
+        function generateBalancedNumbers(frequencyMap) {
+            const sortedNumbers = Object.entries(frequencyMap)
+               .sort((a, b) => b[1] - a[1])
+               .map(item => parseInt(item[0]));
+
+            const hotNumbers = sortedNumbers.slice(0, Math.floor(sortedNumbers.length * 0.3));
+            const mediumNumbers = sortedNumbers.slice(
+                Math.floor(sortedNumbers.length * 0.3),
+                Math.floor(sortedNumbers.length * 0.7)
+            );
+            const coldNumbers = sortedNumbers.slice(Math.floor(sortedNumbers.length * 0.7));
+
+            const numbers = [];
+            numbers.push(...getRandomSelection(hotNumbers, 2));
+            numbers.push(...getRandomSelection(mediumNumbers, 2));
+            numbers.push(...getRandomSelection(coldNumbers, 2));
+
+            return numbers;
+        }
+
+        function generateRandomNumbers() {
+            const numbers = [];
+            while (numbers.length < 6) {
+                const num = Math.floor(Math.random() * 49) + 1;
+                if (!numbers.includes(num)) {
+                    numbers.push(num);
+                }
+            }
+            return numbers;
+        }
+
+        function generateOddEvenBalanced() {
+            const numbers = [];
+            const oddNumbers = [];
+            const evenNumbers = [];
+
+            for (let i = 1; i <= 49; i++) {
+                if (i % 2 === 0) evenNumbers.push(i);
+                else oddNumbers.push(i);
+            }
+
+            numbers.push(...getRandomSelection(oddNumbers, 3));
+            numbers.push(...getRandomSelection(evenNumbers, 3));
+
+            return numbers;
+        }
+
+        function generateSizeBalanced() {
+            const numbers = [];
+            const smallNumbers = Array.from({length: 24}, (_, i) => i + 1);
+            const largeNumbers = Array.from({length: 25}, (_, i) => i + 25);
+
+            numbers.push(...getRandomSelection(smallNumbers, 3));
+            numbers.push(...getRandomSelection(largeNumbers, 3));
+
+            return numbers;
+        }
+
+        function generateConsecutiveNumbers() {
+            const numbers = [];
+            const start = Math.floor(Math.random() * 45) + 1; // Ensure we can fit consecutive numbers
+
+            // Add 2-3 consecutive numbers
+            const consecutiveCount = Math.floor(Math.random() * 2) + 2;
+            for (let i = 0; i < consecutiveCount && numbers.length < 6; i++) {
+                numbers.push(start + i);
+            }
+
+            // Fill remaining with random numbers
+            while (numbers.length < 6) {
+                const num = Math.floor(Math.random() * 49) + 1;
+                if (!numbers.includes(num)) {
+                    numbers.push(num);
+                }
+            }
+
+            return numbers;
+        }
+
+        function getRandomSelection(array, count) {
+            const selected = [];
+            const shuffled = [...array].sort(() => Math.random() - 0.5);
+
+            for (let i = 0; i < Math.min(count, shuffled.length); i++) {
+                selected.push(shuffled[i]);
+            }
+
+            return selected;
+        }
+
+        function removeDuplicateCombinations(combinations) {
+            const seen = new Set();
+            return combinations.filter(combo => {
+                const key = combo.numbers.join(',');
+                if (seen.has(key)) return false;
+                seen.add(key);
+                return true;
+            });
+        }
+
+        function displayCombinations() {
+            const container = document.getElementById('combinations-list');
+            const resultDiv = document.getElementById('combinations-result');
+
+            const strategyNames = {
+                'hot_numbers': '熱門號碼',
+                'cold_numbers': '冷門號碼',
+                'balanced': '平衡策略',
+                'random': '隨機策略',
+                'odd_even_balanced': '奇偶平衡',
+                'size_balanced': '大小平衡',
+                'consecutive': '連號策略'
+            };
+
+            container.innerHTML = generatedCombinations.map((combo, index) => `
+                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                    <div class="flex items-center space-x-4">
+                        <div class="text-sm font-medium text-gray-900">組合 ${index + 1}</div>
+                        <div class="flex items-center space-x-2">
+                            ${combo.numbers.map(num => `
+                                <div class="ball w-8 h-8 rounded-full text-white text-sm font-bold flex items-center justify-center">
+                                    ${num}
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    <div class="text-sm text-gray-600">
+                        策略：${strategyNames[combo.strategy] || combo.strategy}
+                    </div>
+                </div>
+            `).join('');
+
+            resultDiv.classList.remove('hidden');
+        }
+
+        function exportCombinations(format) {
+            if (generatedCombinations.length === 0) {
+                alert('沒有可導出的組合');
+                return;
+            }
+
+            let content, filename, mimeType;
+
+            if (format === 'csv') {
+                const csvRows = [
+                    '組合編號,號碼1,號碼2,號碼3,號碼4,號碼5,號碼6,生成策略,生成時間',
+                    ...generatedCombinations.map((combo, index) =>
+                        `${index + 1},${combo.numbers.join(',')},${combo.strategy},${combo.timestamp}`
+                    )
+                ];
+                content = csvRows.join('\n');
+                filename = `六合彩組合_${new Date().toISOString().split('T')[0]}.csv`;
+                mimeType = 'text/csv;charset=utf-8';
+            } else if (format === 'json') {
+                content = JSON.stringify(generatedCombinations, null, 2);
+                filename = `六合彩組合_${new Date().toISOString().split('T')[0]}.json`;
+                mimeType = 'application/json';
+            } else { // TXT format
+                content = generatedCombinations.map(combo => combo.numbers.join(',')).join('\n');
+                filename = `六合彩組合_${new Date().toISOString().split('T')[0]}.txt`;
+                mimeType = 'text/plain;charset=utf-8';
+            }
+
+            const blob = new Blob([content], { type: mimeType });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            alert(`組合已導出為 ${format.toUpperCase()} 格式`);
+        }
+
+        function populateYearSelectors() {
+            const startYearSelector = document.getElementById('start-year');
+            const endYearSelector = document.getElementById('end-year');
+            const generatorYearContainer = document.getElementById('generator-year-container');
+
+            const years = Array.from(new Set(currentData.map(draw => draw.year))).sort((a, b) => a - b);
+
+            years.forEach(year => {
+                const startOption = document.createElement('option');
+                startOption.value = year;
+                startOption.textContent = `${year}年`;
+                startYearSelector.appendChild(startOption);
+
+                const endOption = document.createElement('option');
+                endOption.value = year;
+                endOption.textContent = `${year}年`;
+                endYearSelector.appendChild(endOption);
+
+                const generatorCheckbox = document.createElement('label');
+                generatorCheckbox.classList.add('flex', 'items-center');
+                generatorCheckbox.innerHTML = `
+                    <input type="checkbox" class="generator-year-checkbox mr-2" value="${year}">
+                    <span>${year}年</span>
+                `;
+                generatorYearContainer.appendChild(generatorCheckbox);
+            });
+        }
+    </script>
+</body>
+</html>
