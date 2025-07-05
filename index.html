@@ -11,32 +11,55 @@
         .ball {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            border-radius: 50%;
+            aspect-ratio: 1/1;
         }
+
         .special-ball {
             background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
             box-shadow: 0 4px 15px rgba(245, 87, 108, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            border-radius: 50%;
+            aspect-ratio: 1/1;
+            border: 2px solid #FFD700;
         }
+
         .gradient-bg {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
+
         .card-hover {
             transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
+
         .card-hover:hover {
             transform: translateY(-5px);
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
         }
+
         .tab-content {
             animation: fadeIn 0.3s ease-in-out;
         }
+
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
+
         .loading {
             animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
         }
-        #minimax-floating-ball {
+
+        #Michael-floating-ball {
             position: fixed;
             bottom: 20px;
             right: 20px;
@@ -52,24 +75,171 @@
             overflow: hidden;
             cursor: pointer;
         }
-        #minimax-floating-ball:hover {
+
+        #Michael-floating-ball:hover {
             transform: translateY(-2px);
         }
+
+        /* 自定義工具類 */
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .text-shadow {
+                text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+            .scrollbar-hide::-webkit-scrollbar {
+                display: none;
+            }
+            .scrollbar-hide {
+                -ms-overflow-style: none;
+                scrollbar-width: none;
+            }
+            .number-ball-xs {
+                width: 7vw;
+                max-width: 32px;
+                min-width: 24px;
+                font-size: clamp(0.6rem, 2vw, 0.8rem);
+            }
+            .number-ball-sm {
+                width: 8vw;
+                max-width: 36px;
+                min-width: 28px;
+                font-size: clamp(0.7rem, 2.2vw, 0.9rem);
+            }
+            .number-ball-md {
+                width: 9vw;
+                max-width: 40px;
+                min-width: 32px;
+                font-size: clamp(0.8rem, 2.5vw, 1rem);
+            }
+        }
     </style>
+
+    <style>
+#Michael-floating-ball {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  padding: 10px 12px;
+  background: #222222;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  color: #F8F8F8;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  z-index: 9999;
+  transition: all 0.3s ease;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+#Michael-floating-ball:hover {
+  transform: translateY(-2px);
+  background: #383838;
+}
+
+.Michael-ball-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.Michael-logo-wave {
+  width: 26px;
+  height: 22px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='22' viewBox='0 0 26 22' fill='none'%3E%3Cg clip-path='url(%23clip0_3442_102412)'%3E%3Cpath d='M12.8405 14.6775C12.8405 14.9897 13.0932 15.2424 13.4055 15.2424C13.7178 15.2424 13.9705 14.9897 13.9705 14.6775V2.98254C13.9705 1.88957 13.0809 1 11.9879 1C10.895 1 10.0054 1.88957 10.0054 2.98254V11.566V17.1068C10.0054 17.5773 9.62327 17.9594 9.1528 17.9594C8.68233 17.9594 8.30021 17.5773 8.30021 17.1068V8.04469C8.30021 6.95172 7.41063 6.06215 6.31767 6.06215C5.22471 6.06215 4.33513 6.95172 4.33513 8.04469V11.8855C4.33513 12.3559 3.953 12.7381 3.48254 12.7381C3.01207 12.7381 2.62994 12.3559 2.62994 11.8855V10.4936C2.62994 10.1813 2.37725 9.92861 2.06497 9.92861C1.7527 9.92861 1.5 10.1813 1.5 10.4936V11.8855C1.5 12.9784 2.38957 13.868 3.48254 13.868C4.5755 13.868 5.46508 12.9784 5.46508 11.8855V8.04469C5.46508 7.57422 5.8472 7.19209 6.31767 7.19209C6.78814 7.19209 7.17026 7.57422 7.17026 8.04469V17.1068C7.17026 18.1998 8.05984 19.0894 9.1528 19.0894C10.2458 19.0894 11.1353 18.1998 11.1353 17.1068V2.98254C11.1353 2.51207 11.5175 2.12994 11.9879 2.12994C12.4584 2.12994 12.8405 2.51207 12.8405 2.98254V14.6775Z' fill='%23F8F8F8'/%3E%3Cpath d='M23.3278 6.06215C22.2348 6.06215 21.3452 6.95172 21.3452 8.04469V15.6143C21.3452 16.0847 20.9631 16.4669 20.4926 16.4669C20.0222 16.4669 19.6401 16.0847 19.6401 15.6143V2.98254C19.6401 1.88957 18.7505 1 17.6575 1C16.5645 1 15.675 1.88957 15.675 2.98254V19.0175C15.675 19.4879 15.2928 19.8701 14.8224 19.8701C14.3519 19.8701 13.9698 19.4879 13.9698 19.0175V17.0329C13.9698 16.7206 13.7171 16.4679 13.4048 16.4679C13.0925 16.4679 12.8398 16.7206 12.8398 17.0329V19.0175C12.8398 20.1104 13.7294 21 14.8224 21C15.9153 21 16.8049 20.1104 16.8049 19.0175V2.98254C16.8049 2.51207 17.187 2.12994 17.6575 2.12994C18.128 2.12994 18.5101 2.51207 18.5101 2.98254V15.6143C18.5101 16.7072 19.3997 17.5968 20.4926 17.5968C21.5856 17.5968 22.4752 16.7072 22.4752 15.6143V8.04469C22.4752 7.57422 22.8573 7.19209 23.3278 7.19209C23.7982 7.19209 24.1804 7.57422 24.1804 8.04469V14.6775C24.1804 14.9897 24.4331 15.2424 24.7453 15.2424C25.0576 15.2424 25.3103 14.9897 25.3103 14.6775V8.04469C25.3103 6.95172 24.4207 6.06215 23.3278 6.06215Z' fill='%23F8F8F8'/%3E%3C/g%3E%3Cdefs%3E%3CclipPath id='clip0_3442_102412'%3E%3Crect width='25' height='22' fill='white' transform='translate(0.5)'/%3E%3C/clipPath%3E%3C/defs%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.Michael-ball-text {
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.Michael-close-icon {
+  margin-left: 8px;
+  font-size: 16px;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  cursor: pointer;
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
+}
+
+.Michael-close-icon:hover {
+  opacity: 1;
+}
+</style>
+<div id="Michael-floating-ball">
+  <div class="Michael-ball-content">
+    <span class="Michael-ball-text">Created by Michael</span>
+  </div>
+  <div class="Michael-close-icon">×</div>
+</div>
+<script>
+// Initialize floating ball functionality
+function initFloatingBall() {
+  const ball = document.getElementById('Michael-floating-ball');
+  if (!ball) return;
+
+  // Initial animation
+  ball.style.opacity = '0';
+  ball.style.transform = 'translateY(20px)';
+
+  setTimeout(() => {
+    ball.style.opacity = '1';
+    ball.style.transform = 'translateY(0)';
+  }, 500);
+
+  // Handle logo click
+  const ballContent = ball.querySelector('.Michael-ball-content');
+  ballContent.addEventListener('click', function (e) {
+    e.stopPropagation();
+    window.open('https://marksix-black.vercel.app/', '_blank');
+    ball.style.transform = 'scale(0.95)';
+    setTimeout(() => {
+      ball.style.transform = 'scale(1)';
+    }, 100);
+  });
+
+  // Handle close button click
+  const closeIcon = ball.querySelector('.Michael-close-icon');
+  closeIcon.addEventListener('click', function (e) {
+    e.stopPropagation();
+    ball.style.opacity = '0';
+    ball.style.transform = 'translateY(20px)';
+
+    setTimeout(() => {
+      ball.style.display = 'none';
+    }, 300);
+  });
+}
+
+// Initialize when DOM is ready
+document.addEventListener('DOMContentLoaded', initFloatingBall);
+</script>
+
 </head>
-<body>
+<body class="bg-gray-50 font-sans">
     <!-- Navigation -->
-    <nav class="bg-white shadow-md">
+    <nav class="bg-white shadow-md sticky top-0 z-30">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16">
-                <div class="flex">
-                    <button class="tab-btn py-4 px-6 text-gray-500 hover:text-gray-700 font-medium" data-tab="dashboard">
+                <div class="flex overflow-x-auto scrollbar-hide space-x-2">
+                    <button class="tab-btn py-4 px-4 sm:px-6 text-gray-500 hover:text-gray-700 font-medium whitespace-nowrap" data-tab="dashboard">
                         <i class="fas fa-tachometer-alt mr-2"></i>儀表盤
                     </button>
-                    <button class="tab-btn py-4 px-6 text-gray-500 hover:text-gray-700 font-medium" data-tab="statistics">
+                    <button class="tab-btn py-4 px-4 sm:px-6 text-gray-500 hover:text-gray-700 font-medium whitespace-nowrap" data-tab="statistics">
                         <i class="fas fa-chart-bar mr-2"></i>統計分析
                     </button>
-                    <button class="tab-btn py-4 px-6 text-gray-500 hover:text-gray-700 font-medium" data-tab="generator">
+                    <button class="tab-btn py-4 px-4 sm:px-6 text-gray-500 hover:text-gray-700 font-medium whitespace-nowrap" data-tab="generator">
                         <i class="fas fa-magic mr-2"></i>組合生成器
                     </button>
                 </div>
@@ -78,16 +248,16 @@
     </nav>
 
     <!-- Main Content -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <!-- Dashboard Tab -->
         <div id="dashboard-content" class="tab-content">
             <!-- Stats Overview -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                <div class="bg-white rounded-lg shadow-md p-6 card-hover">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                <div class="bg-white rounded-lg shadow-md p-4 sm:p-6 card-hover">
                     <div class="flex items-center justify-between">
                         <div>
-                            <p class="text-sm font-medium text-gray-600">總開獎期數</p>
-                            <p class="text-2xl font-bold text-gray-900" id="total-draws">0</p>
+                            <p class="text-xs sm:text-sm font-medium text-gray-600">總開獎期數</p>
+                            <p class="text-xl sm:text-2xl font-bold text-gray-900" id="total-draws">0</p>
                         </div>
                         <div class="bg-blue-100 p-3 rounded-full">
                             <i class="fas fa-hashtag text-blue-600"></i>
@@ -96,11 +266,11 @@
                     <p class="text-xs text-gray-500 mt-2">數據範圍：2020-2025年</p>
                 </div>
 
-                <div class="bg-white rounded-lg shadow-md p-6 card-hover">
+                <div class="bg-white rounded-lg shadow-md p-4 sm:p-6 card-hover">
                     <div class="flex items-center justify-between">
                         <div>
-                            <p class="text-sm font-medium text-gray-600">最熱門號碼</p>
-                            <p class="text-2xl font-bold text-red-600" id="hot-number" style="max-width: 100px; word-wrap: break-word;">--</p>
+                            <p class="text-xs sm:text-sm font-medium text-gray-600">最熱門號碼</p>
+                            <p class="text-xl sm:text-2xl font-bold text-red-600" id="hot-number" style="max-width: 100px; word-wrap: break-word;">--</p>
                         </div>
                         <div class="bg-red-100 p-3 rounded-full">
                             <i class="fas fa-fire text-red-600"></i>
@@ -109,11 +279,11 @@
                     <p class="text-xs text-gray-500 mt-2">出現 <span id="hot-frequency">0</span> 次</p>
                 </div>
 
-                <div class="bg-white rounded-lg shadow-md p-6 card-hover">
+                <div class="bg-white rounded-lg shadow-md p-4 sm:p-6 card-hover">
                     <div class="flex items-center justify-between">
                         <div>
-                            <p class="text-sm font-medium text-gray-600">最冷門號碼</p>
-                            <p class="text-2xl font-bold text-blue-600" id="cold-number" style="max-width: 100px; word-wrap: break-word;">--</p>
+                            <p class="text-xs sm:text-sm font-medium text-gray-600">最冷門號碼</p>
+                            <p class="text-xl sm:text-2xl font-bold text-blue-600" id="cold-number" style="max-width: 100px; word-wrap: break-word;">--</p>
                         </div>
                         <div class="bg-blue-100 p-3 rounded-full">
                             <i class="fas fa-snowflake text-blue-600"></i>
@@ -122,11 +292,11 @@
                     <p class="text-xs text-gray-500 mt-2">出現 <span id="cold-frequency">0</span> 次</p>
                 </div>
 
-                <div class="bg-white rounded-lg shadow-md p-6 card-hover">
+                <div class="bg-white rounded-lg shadow-md p-4 sm:p-6 card-hover">
                     <div class="flex items-center justify-between">
                         <div>
-                            <p class="text-sm font-medium text-gray-600">最新期數</p>
-                            <p class="text-2xl font-bold text-purple-600" id="latest-period">--</p>
+                            <p class="text-xs sm:text-sm font-medium text-gray-600">最新期數</p>
+                            <p class="text-xl sm:text-2xl font-bold text-purple-600" id="latest-period">--</p>
                         </div>
                         <div class="bg-purple-100 p-3 rounded-full">
                             <i class="fas fa-calendar text-purple-600"></i>
@@ -137,29 +307,29 @@
             </div>
 
             <!-- Recent Results -->
-            <div class="bg-white rounded-lg shadow-md p-6 mb-8">
-                <h2 class="text-xl font-bold text-gray-900 mb-6 flex items-center">
+            <div class="bg-white rounded-lg shadow-md p-4 sm:p-6 mb-6">
+                <h2 class="text-lg sm:text-xl font-bold text-gray-900 mb-4 flex items-center">
                     <i class="fas fa-history mr-2 text-blue-600"></i>
                     最近開獎結果
                 </h2>
-                <div id="recent-results" class="space-y-4">
+                <div id="recent-results" class="space-y-3 sm:space-y-4">
                     <!-- Recent results will be populated here -->
                 </div>
             </div>
 
             <!-- Quick Stats -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div class="bg-white rounded-lg shadow-md p-6">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4">號碼頻率 TOP 10</h3>
-                    <div id="frequency-chart-container">
-                        <canvas id="frequency-chart" width="400" height="200"></canvas>
+                <div class="bg-white rounded-lg shadow-md p-4 sm:p-6">
+                    <h3 class="text-base sm:text-lg font-semibold text-gray-900 mb-4">號碼頻率 TOP 10</h3>
+                    <div id="frequency-chart-container" class="h-64">
+                        <canvas id="frequency-chart"></canvas>
                     </div>
                 </div>
 
-                <div class="bg-white rounded-lg shadow-md p-6">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4">奇偶分佈</h3>
-                    <div id="odd-even-chart-container">
-                        <canvas id="odd-even-chart" width="400" height="200"></canvas>
+                <div class="bg-white rounded-lg shadow-md p-4 sm:p-6">
+                    <h3 class="text-base sm:text-lg font-semibold text-gray-900 mb-4">奇偶分佈</h3>
+                    <div id="odd-even-chart-container" class="h-64">
+                        <canvas id="odd-even-chart"></canvas>
                     </div>
                 </div>
             </div>
@@ -168,8 +338,8 @@
         <!-- Statistics Tab -->
         <div id="statistics-content" class="tab-content hidden">
             <!-- Year Range Selector -->
-            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
-                <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
+            <div class="bg-white rounded-lg shadow-md p-4 sm:p-6 mb-6">
+                <h2 class="text-lg sm:text-xl font-bold text-gray-900 mb-4 flex items-center">
                     <i class="fas fa-filter mr-2 text-blue-600"></i>
                     年份範圍選擇
                 </h2>
@@ -201,17 +371,17 @@
             </div>
 
             <!-- Detailed Statistics Tables -->
-            <div class="bg-white rounded-lg shadow-md p-6">
-                <h3 class="text-lg font-semibold text-gray-900 mb-4">詳細統計表</h3>
+            <div class="bg-white rounded-lg shadow-md p-4 sm:p-6">
+                <h3 class="text-base sm:text-lg font-semibold text-gray-900 mb-4">詳細統計表</h3>
                 <div class="overflow-x-auto">
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50">
                             <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">號碼</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">出現次數</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">頻率 (%)</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">分類</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">最後出現</th>
+                                <th class="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">號碼</th>
+                                <th class="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">出現次數</th>
+                                <th class="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">頻率 (%)</th>
+                                <th class="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">分類</th>
+                                <th class="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">最後出現</th>
                             </tr>
                         </thead>
                         <tbody id="stats-table" class="bg-white divide-y divide-gray-200">
@@ -225,19 +395,19 @@
         <!-- Generator Tab -->
         <div id="generator-content" class="tab-content hidden">
             <!-- Configuration Panel -->
-            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
-                <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
+            <div class="bg-white rounded-lg shadow-md p-4 sm:p-6 mb-6">
+                <h2 class="text-lg sm:text-xl font-bold text-gray-900 mb-4 flex items-center">
                     <i class="fas fa-cogs mr-2 text-blue-600"></i>
                     組合生成配置
                 </h2>
 
                 <!-- Year Selection for Generator -->
                 <div class="mb-6">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-3">歷史數據年份選擇</h3>
+                    <h3 class="text-base sm:text-lg font-semibold text-gray-900 mb-3">歷史數據年份選擇</h3>
                     <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mb-4" id="generator-year-container">
                         <!-- Year checkboxes will be populated here -->
                     </div>
-                    <div class="bg-gray-50 rounded-lg p-4">
+                    <div class="bg-gray-50 rounded-lg p-3 sm:p-4">
                         <p class="text-sm text-gray-600">
                             基於 <span id="generator-total" class="font-semibold text-blue-600">0</span> 期開獎記錄生成組合
                         </p>
@@ -246,61 +416,61 @@
 
                 <!-- Strategy Selection -->
                 <div class="mb-6">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-3">生成策略選擇</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        <label class="flex items-start p-4 border rounded-lg hover:bg-gray-50 cursor-pointer">
+                    <h3 class="text-base sm:text-lg font-semibold text-gray-900 mb-3">生成策略選擇</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+                        <label class="flex items-start p-3 sm:p-4 border rounded-lg hover:bg-gray-50 cursor-pointer">
                             <input type="checkbox" class="strategy-checkbox mr-3 mt-1" value="hot_numbers" checked>
                             <div>
-                                <div class="font-medium text-gray-900">熱門號碼策略</div>
-                                <div class="text-sm text-gray-600">基於出現頻率最高的號碼</div>
+                                <div class="font-medium text-gray-900 text-sm sm:text-base">熱門號碼策略</div>
+                                <div class="text-xs sm:text-sm text-gray-600">基於出現頻率最高的號碼</div>
                             </div>
                         </label>
 
-                        <label class="flex items-start p-4 border rounded-lg hover:bg-gray-50 cursor-pointer">
+                        <label class="flex items-start p-3 sm:p-4 border rounded-lg hover:bg-gray-50 cursor-pointer">
                             <input type="checkbox" class="strategy-checkbox mr-3 mt-1" value="cold_numbers">
                             <div>
-                                <div class="font-medium text-gray-900">冷門號碼策略</div>
-                                <div class="text-sm text-gray-600">基於出現頻率最低的號碼</div>
+                                <div class="font-medium text-gray-900 text-sm sm:text-base">冷門號碼策略</div>
+                                <div class="text-xs sm:text-sm text-gray-600">基於出現頻率最低的號碼</div>
                             </div>
                         </label>
 
-                        <label class="flex items-start p-4 border rounded-lg hover:bg-gray-50 cursor-pointer">
+                        <label class="flex items-start p-3 sm:p-4 border rounded-lg hover:bg-gray-50 cursor-pointer">
                             <input type="checkbox" class="strategy-checkbox mr-3 mt-1" value="balanced">
                             <div>
-                                <div class="font-medium text-gray-900">平衡策略</div>
-                                <div class="text-sm text-gray-600">結合熱門、中溫和冷門號碼</div>
+                                <div class="font-medium text-gray-900 text-sm sm:text-base">平衡策略</div>
+                                <div class="text-xs sm:text-sm text-gray-600">結合熱門、中溫和冷門號碼</div>
                             </div>
                         </label>
 
-                        <label class="flex items-start p-4 border rounded-lg hover:bg-gray-50 cursor-pointer">
+                        <label class="flex items-start p-3 sm:p-4 border rounded-lg hover:bg-gray-50 cursor-pointer">
                             <input type="checkbox" class="strategy-checkbox mr-3 mt-1" value="random">
                             <div>
-                                <div class="font-medium text-gray-900">隨機策略</div>
-                                <div class="text-sm text-gray-600">完全隨機生成號碼組合</div>
+                                <div class="font-medium text-gray-900 text-sm sm:text-base">隨機策略</div>
+                                <div class="text-xs sm:text-sm text-gray-600">完全隨機生成號碼組合</div>
                             </div>
                         </label>
 
-                        <label class="flex items-start p-4 border rounded-lg hover:bg-gray-50 cursor-pointer">
+                        <label class="flex items-start p-3 sm:p-4 border rounded-lg hover:bg-gray-50 cursor-pointer">
                             <input type="checkbox" class="strategy-checkbox mr-3 mt-1" value="odd_even_balanced">
                             <div>
-                                <div class="font-medium text-gray-900">奇偶平衡策略</div>
-                                <div class="text-sm text-gray-600">確保奇偶數的合理分佈</div>
+                                <div class="font-medium text-gray-900 text-sm sm:text-base">奇偶平衡策略</div>
+                                <div class="text-xs sm:text-sm text-gray-600">確保奇偶數的合理分佈</div>
                             </div>
                         </label>
 
-                        <label class="flex items-start p-4 border rounded-lg hover:bg-gray-50 cursor-pointer">
+                        <label class="flex items-start p-3 sm:p-4 border rounded-lg hover:bg-gray-50 cursor-pointer">
                             <input type="checkbox" class="strategy-checkbox mr-3 mt-1" value="size_balanced">
                             <div>
-                                <div class="font-medium text-gray-900">大小平衡策略</div>
-                                <div class="text-sm text-gray-600">確保大小號的合理分佈</div>
+                                <div class="font-medium text-gray-900 text-sm sm:text-base">大小平衡策略</div>
+                                <div class="text-xs sm:text-sm text-gray-600">確保大小號的合理分佈</div>
                             </div>
                         </label>
 
-                        <label class="flex items-start p-4 border rounded-lg hover:bg-gray-50 cursor-pointer">
+                        <label class="flex items-start p-3 sm:p-4 border rounded-lg hover:bg-gray-50 cursor-pointer">
                             <input type="checkbox" class="strategy-checkbox mr-3 mt-1" value="consecutive">
                             <div>
-                                <div class="font-medium text-gray-900">連號策略</div>
-                                <div class="text-sm text-gray-600">基於連續號碼出現規律</div>
+                                <div class="font-medium text-gray-900 text-sm sm:text-base">連號策略</div>
+                                <div class="text-xs sm:text-sm text-gray-600">基於連續號碼出現規律</div>
                             </div>
                         </label>
                     </div>
@@ -308,14 +478,14 @@
 
                 <!-- Generation Settings -->
                 <div class="mb-6">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-3">生成設定</h3>
-                    <div class="flex items-center space-x-4">
+                    <h3 class="text-base sm:text-lg font-semibold text-gray-900 mb-3">生成設定</h3>
+                    <div class="flex flex-wrap items-center space-x-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">組合數量</label>
                             <input type="number" id="combination-count" min="1" max="1000" value="10"
                                    class="w-24 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                         </div>
-                        <div class="flex items-end">
+                        <div class="flex items-end mt-4 sm:mt-0">
                             <button id="generate-combinations" class="gradient-bg text-white px-6 py-2 rounded-md hover:opacity-90 transition-opacity font-medium">
                                 <i class="fas fa-magic mr-2"></i>生成組合
                             </button>
@@ -325,18 +495,18 @@
             </div>
 
             <!-- Generated Combinations -->
-            <div id="combinations-result" class="bg-white rounded-lg shadow-md p-6 hidden">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-lg font-semibold text-gray-900">生成的組合</h3>
-                    <div class="space-x-2">
-                        <button id="export-csv" class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition-colors">
-                            <i class="fas fa-file-csv mr-2"></i>導出 CSV
+            <div id="combinations-result" class="bg-white rounded-lg shadow-md p-4 sm:p-6 hidden">
+                <div class="flex flex-wrap justify-between items-center mb-4">
+                    <h3 class="text-base sm:text-lg font-semibold text-gray-900">生成的組合</h3>
+                    <div class="flex flex-wrap gap-2 mt-3 sm:mt-0">
+                        <button id="export-csv" class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition-colors text-sm whitespace-nowrap">
+                            <i class="fas fa-file-csv mr-1"></i>導出 CSV
                         </button>
-                        <button id="export-json" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors">
-                            <i class="fas fa-file-code mr-2"></i>導出 JSON
+                        <button id="export-json" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors text-sm whitespace-nowrap">
+                            <i class="fas fa-file-code mr-1"></i>導出 JSON
                         </button>
-                        <button id="export-txt" class="bg-purple-600 text-white px-4 py-2 rounded-md hover:bg-purple-700 transition-colors">
-                            <i class="fas fa-file-alt mr-2"></i>導出 TXT
+                        <button id="export-txt" class="bg-purple-600 text-white px-4 py-2 rounded-md hover:bg-purple-700 transition-colors text-sm whitespace-nowrap">
+                            <i class="fas fa-file-alt mr-1"></i>導出 TXT
                         </button>
                     </div>
                 </div>
@@ -350,9 +520,9 @@
     <!-- Footer -->
     <footer class="bg-gray-800 text-white py-8 mt-12">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
                 <div>
-                    <h3 class="text-lg font-semibold mb-4">系統資訊</h3>
+                    <h3 class="text-base sm:text-lg font-semibold mb-4">系統資訊</h3>
                     <ul class="space-y-2 text-sm text-gray-300">
                         <li>版本：純前端 v1.0</li>
                         <li>更新日期：2025年7月5日</li>
@@ -362,7 +532,7 @@
                 </div>
 
                 <div>
-                    <h3 class="text-lg font-semibold mb-4">功能特色</h3>
+                    <h3 class="text-base sm:text-lg font-semibold mb-4">功能特色</h3>
                     <ul class="space-y-2 text-sm text-gray-300">
                         <li>• 即時統計分析</li>
                         <li>• 多策略組合生成</li>
@@ -372,7 +542,7 @@
                 </div>
 
                 <div>
-                    <h3 class="text-lg font-semibold mb-4">數據來源</h3>
+                    <h3 class="text-base sm:text-lg font-semibold mb-4">數據來源</h3>
                     <ul class="space-y-2 text-sm text-gray-300">
                         <li>• 香港賽馬會官方數據</li>
                         <li>• 每週二、四、六開獎</li>
@@ -382,7 +552,7 @@
                 </div>
 
                 <div>
-                    <h3 class="text-lg font-semibold mb-4">免責聲明</h3>
+                    <h3 class="text-base sm:text-lg font-semibold mb-4">免責聲明</h3>
                     <p class="text-sm text-gray-400">
                         本系統提供的所有數據和分析僅供研究和參考用途。
                         任何基於本系統進行的投注決策，風險自負。
@@ -392,7 +562,7 @@
             </div>
 
             <div class="border-t border-gray-700 mt-8 pt-8 text-center">
-                <p class="text-sm text-gray-400">
+                <p class="text-xs sm:text-sm text-gray-400">
                     © 2025 香港六合彩統計分析系統. 純前端版本，不依賴任何後端服務。
                 </p>
             </div>
@@ -529,22 +699,18 @@
             const container = document.getElementById('recent-results');
 
             container.innerHTML = recentData.map(draw => `
-                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                    <div class="flex items-center space-x-4">
+                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 sm:p-4 bg-gray-50 rounded-lg">
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center space-x-4 mb-3 sm:mb-0">
                         <div class="text-sm font-medium text-gray-900">
                             ${draw.year}年第${draw.period}期
                         </div>
-                        <div class="text-sm text-gray-600">${draw.date}</div>
+                        <div class="text-xs sm:text-sm text-gray-600 mt-1 sm:mt-0">${draw.date}</div>
                     </div>
-                    <div class="flex items-center space-x-2">
+                    <div class="flex items-center space-x-1 sm:space-x-2">
                         ${draw.numbers.map(num => `
-                            <div class="ball w-8 h-8 rounded-full text-white text-sm font-bold flex items-center justify-center">
-                                ${num}
-                            </div>
+                            <div class="ball number-ball-xs sm:number-ball-sm">${num}</div>
                         `).join('')}
-                        <div class="special-ball w-8 h-8 rounded-full text-white text-sm font-bold flex items-center justify-center border-2 border-yellow-400">
-                            ${draw.special}
-                        </div>
+                        <div class="special-ball number-ball-xs sm:number-ball-sm">${draw.special}</div>
                     </div>
                 </div>
             `).join('');
@@ -720,10 +886,10 @@
 
                 return `
                     <tr class="hover:bg-gray-50">
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${number}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${frequency}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${percentage}%</td>
-                        <td class="px-6 py-4 whitespace-nowrap">
+                        <td class="px-4 sm:px-6 py-3 whitespace-nowrap text-sm font-medium text-gray-900">${number}</td>
+                        <td class="px-4 sm:px-6 py-3 whitespace-nowrap text-sm text-gray-900">${frequency}</td>
+                        <td class="px-4 sm:px-6 py-3 whitespace-nowrap text-sm text-gray-900">${percentage}%</td>
+                        <td class="px-4 sm:px-6 py-3 whitespace-nowrap">
                             <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
                                 category === '熱門' ? 'bg-red-100 text-red-800' :
                                 category === '冷門' ? 'bg-blue-100 text-blue-800' :
@@ -732,7 +898,7 @@
                                 ${category}
                             </span>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${lastOccurrence}</td>
+                        <td class="px-4 sm:px-6 py-3 whitespace-nowrap text-sm text-gray-900">${lastOccurrence}</td>
                     </tr>
                 `;
             }).join('');
@@ -963,18 +1129,16 @@
             };
 
             container.innerHTML = generatedCombinations.map((combo, index) => `
-                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                    <div class="flex items-center space-x-4">
+                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 sm:p-4 bg-gray-50 rounded-lg">
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center space-x-4 mb-3 sm:mb-0">
                         <div class="text-sm font-medium text-gray-900">組合 ${index + 1}</div>
-                        <div class="flex items-center space-x-2">
+                        <div class="flex items-center space-x-1 sm:space-x-2 mt-2 sm:mt-0">
                             ${combo.numbers.map(num => `
-                                <div class="ball w-8 h-8 rounded-full text-white text-sm font-bold flex items-center justify-center">
-                                    ${num}
-                                </div>
+                                <div class="ball number-ball-xs sm:number-ball-sm">${num}</div>
                             `).join('')}
                         </div>
                     </div>
-                    <div class="text-sm text-gray-600">
+                    <div class="text-xs sm:text-sm text-gray-600 whitespace-nowrap">
                         策略：${strategyNames[combo.strategy] || combo.strategy}
                     </div>
                 </div>
@@ -1051,6 +1215,7 @@
                 generatorYearContainer.appendChild(generatorCheckbox);
             });
         }
+
     </script>
 </body>
 </html>
