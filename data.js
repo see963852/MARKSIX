@@ -44173,20 +44173,6 @@ const LOTTERY_DATA = [
       46
     ],
     "special": 36
-  },
-  {
-    "year": 2025,
-    "period": 74,
-    "date": "2025-07-08",
-    "numbers": [
-      22,
-      16,
-      13,
-      23,
-      17,
-      35
-    ],
-    "special": 41
   }
 ];
 
