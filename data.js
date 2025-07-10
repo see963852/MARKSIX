@@ -1,8 +1,3 @@
-// 香港六合彩歷史數據 - 真實數據源
-// 數據來源：cpzhan.com
-// 更新時間：2025-07-05 09:29:24
-// 總記錄數：3156
-
 const LOTTERY_DATA = [
   {
     "year": 2003,
@@ -44173,7 +44168,7 @@ const LOTTERY_DATA = [
       46
     ],
     "special": 36
-  ,
+  },
   {
     "year": 2025,
     "period": 74,
